@@ -507,9 +507,13 @@ class Publishes(Packets):
       topic_short = topic_short.encode()
       fmt = '>%ds' % len(topic_short)
       buffer += topic_short
-    self.Data = str(self.Data).encode()
-    fmt = '>%ds' % len(self.Data)
-    buffer += writeInt16(self.MsgId) + struct.pack(fmt, self.Data)
+    if isinstance(self.Data, str):
+      self.Data = str(self.Data).encode()
+      fmt = '>%ds' % len(self.Data)
+      self.Data = struct.pack(fmt, self.Data)
+    elif isinstance(self.Data, bytes):
+      pass
+    buffer += writeInt16(self.MsgId) + self.Data
     return self.mh.pack(len(buffer)) + buffer
 
   def unpack(self, buffer):

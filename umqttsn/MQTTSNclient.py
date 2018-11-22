@@ -166,10 +166,8 @@ class Client:
 
 
   def publish(self, topic, payload, qos=0, retained=False):
-    if isinstance(payload, str):
+    if isinstance(payload, str) or isinstance(payload, bytes):
       pass
-    elif isinstance(payload, bytes):
-      payload = payload.decode()
     else:
       raise TypeError('Payload must be str or bytes.')
     publish = MQTTSN.Publishes()
