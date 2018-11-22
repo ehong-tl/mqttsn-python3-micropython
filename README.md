@@ -1,5 +1,5 @@
 # mqttsn-python3-micropython
-MQTT-SN for Python 3 and Micropython
+MQTT-SN client for Python 3 and Micropython
 
 **mqttsn**: Python 3 library</br>
 **umqttsn**: Micropython library (Work best as frozen module)</br>
