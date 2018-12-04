@@ -85,8 +85,7 @@ class Receivers:
         callback.advertise(address, packet.GwId, packet.Duration)
 
     elif packet.mh.MsgType == MQTTSN.REGISTER:
-      if callback and hasattr(callback, "register"):
-        topicmap.register(packet.TopicId, packet.TopicName)
+      topicmap.register(packet.TopicId, packet.TopicName)
 
     elif packet.mh.MsgType == MQTTSN.PUBACK:
       "check if we are expecting a puback"
