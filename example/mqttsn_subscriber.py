@@ -5,15 +5,9 @@ import sys
 
 class Callback:
 
-    def __init__(self):
-        self.registered = {}
-
     def messageArrived(self, topicName, payload, qos, retained, msgid):
         print('Got msg %s from %s' % (payload, topicName))
         return True
-
-    def register(self, topicId, topicName):
-        self.registered[topicId] = topicName
 
 def connect_gateway():
     try:
@@ -30,9 +24,11 @@ def connect_gateway():
         sys.exit()
 
 def subscribe_topic():
-    aclient.subscribe("topic2", qos=2)
+    aclient.subscribe("topic3", qos=2)
+    print("Subscribed to topic3.")
+    aclient.subscribe("topic2", qos=1)
     print("Subscribed to topic2.")
-    aclient.subscribe("topic1", qos=2)
+    aclient.subscribe("topic1", qos=0)
     print("Subscribed to topic1.")
 
 aclient = Client("client_sn_sub", "10.42.0.1", port=10000)
@@ -49,5 +45,7 @@ except KeyboardInterrupt:
     print("Unsubscribe from topic1.")
     aclient.unsubscribe('topic2')
     print("Unsubscribe from topic2.")
+    aclient.unsubscribe('topic3')
+    print("Unsubscribe from topic3.")
     aclient.disconnect()
-    print("Disconnectd from gateway.")
+    print("Disconnected from gateway.")

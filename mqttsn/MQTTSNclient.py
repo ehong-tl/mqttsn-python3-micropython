@@ -26,7 +26,6 @@ class Callback:
 
   def __init__(self):
     self.events = []
-    self.registered = {}
 
   def connectionLost(self, cause):
     print("default connectionLost", cause)
@@ -42,6 +41,11 @@ class Callback:
   def advertise(self, address, gwid, duration):
     print("advertise", address, gwid, duration)
 
+class TopicMap:
+
+  def __init__(self):
+    self.registered = {}
+
   def register(self, topicId, topicName):
     self.registered[topicId] = topicName
 
@@ -54,6 +58,7 @@ class Client:
     self.msgid = 1
     self.callback = None
     self.__receiver = None
+    self.topicmap = TopicMap()
     self.queue = queue.Queue()
         
   def start(self):
@@ -110,7 +115,7 @@ class Client:
   def startReceiver(self):
     self.__receiver = MQTTSNinternal.Receivers(self.sock)
     if self.callback:
-      id = _thread.start_new_thread(self.__receiver, (self.callback,self.queue,))
+      id = _thread.start_new_thread(self.__receiver, (self.callback,self.topicmap,self.queue,))
 
 
   def waitfor(self, msgType, msgId=None):
@@ -140,7 +145,7 @@ class Client:
       self.__receiver.lookfor(MQTTSN.SUBACK)
     self.sock.send(subscribe.pack())
     msg = self.waitfor(MQTTSN.SUBACK, subscribe.MsgId)
-    self.callback.register(msg.TopicId, topic)
+    self.topicmap.register(msg.TopicId, topic)
     return msg.ReturnCode, msg.TopicId
 
 
@@ -161,7 +166,7 @@ class Client:
       self.__receiver.lookfor(MQTTSN.REGACK)
     self.sock.send(register.pack())
     msg = self.waitfor(MQTTSN.REGACK, register.MsgId)
-    self.callback.register(msg.TopicId, topicName)
+    self.topicmap.register(msg.TopicId, topicName)
     return msg.TopicId
 
 

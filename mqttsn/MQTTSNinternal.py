@@ -62,7 +62,7 @@ class Receivers:
     self.observe = None
     return msg
 
-  def receive(self, callback=None):
+  def receive(self, topicmap, callback=None):
     packet = None
     try:
       packet, address = MQTTSN.unpackPacket(MQTTSN.getPacket(self.socket))
@@ -85,8 +85,7 @@ class Receivers:
         callback.advertise(address, packet.GwId, packet.Duration)
 
     elif packet.mh.MsgType == MQTTSN.REGISTER:
-      if callback and hasattr(callback, "register"):
-        callback.register(packet.TopicId, packet.TopicName)
+      topicmap.register(packet.TopicId, packet.TopicName)
 
     elif packet.mh.MsgType == MQTTSN.PUBACK:
       "check if we are expecting a puback"
@@ -113,7 +112,7 @@ class Receivers:
         pass # what should we do here?
       else:
         pub = self.inMsgs[packet.MsgId]
-        topicname = callback.registered[pub.TopicId]
+        topicname = topicmap.registered[pub.TopicId]
         if callback == None or \
            callback.messageArrived(topicname, pub.Data, 2, pub.Flags.Retain, pub.MsgId):
           del self.inMsgs[packet.MsgId]
@@ -136,7 +135,7 @@ class Receivers:
       "finished with this message id"
       if packet.Flags.QoS in [0, 3]:
         qos = packet.Flags.QoS
-        topicname = callback.registered[packet.TopicId]
+        topicname = topicmap.registered[packet.TopicId]
         data = packet.Data
         if qos == 3:
           qos = -1
@@ -148,7 +147,7 @@ class Receivers:
         else:
           callback.messageArrived(topicname, data, qos, packet.Flags.Retain, packet.MsgId)
       elif packet.Flags.QoS == 1:
-        topicname = callback.registered[packet.TopicId]
+        topicname = topicmap.registered[packet.TopicId]
         if callback == None:
           return (topicname, packet.Data, 1,
                            packet.Flags.Retain, packet.MsgId)
@@ -166,10 +165,10 @@ class Receivers:
       raise Exception("Unexpected packet"+str(packet))
     return packet
 
-  def __call__(self, callback, queue):
+  def __call__(self, callback, topicmap, queue):
     try:
       while True:
-        self.receive(callback)
+        self.receive(topicmap, callback)
     except:
       queue.put(sys.exc_info())
       if sys.exc_info()[0] != socket.error:
