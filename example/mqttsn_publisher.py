@@ -9,21 +9,20 @@ class Callback:
         self.registered = {}
 
     def published(self, MsgId):
-        if pub_msgid == MsgId:
-            print("Published")
+        print("Published")
 
     def register(self, TopicId, TopicName):
         self.registered[TopicId] = TopicName
 
-def connect_broker():
+def connect_gateway():
     try:
         while True:
             try:
                 aclient.connect()
-                print('Connected to broker...')
+                print('Connected to gateway...')
                 break
             except:
-                print('Failed to connect to broker, reconnecting...')
+                print('Failed to connect to gateway, reconnecting...')
                 time.sleep(1)
     except KeyboardInterrupt:
         print('Exiting...')
@@ -36,30 +35,21 @@ def register_topic():
     topic2 = aclient.register("topic2")
     print("topic2 registered.")
 
-aclient = Client("client_sn_pub", "10.42.0.1", port=1884)
+aclient = Client("client_sn_pub", "10.42.0.1", port=10000)
 aclient.registerCallback(Callback())
-connect_broker()
+connect_gateway()
 
 topic1 = None
 topic2 = None
 register_topic()
 
 payload1 = struct.pack('BBBB', 1,2,3,4)
-i = 0
-try:
-    while True:
-        if not aclient.queue.empty():
-            exp = aclient.queue.get()
-            err = str(exp[1]).split(', ')[1]
-            if err == 'DISCONNECT':
-                connect_broker()
-                register_topic()
-        else:
-            i += 1
-            pub_msgid = aclient.publish(topic1, payload1, qos=2)
-            time.sleep(1)
-            pub_msgid = aclient.publish(topic2, str(i), qos=2)
-            time.sleep(1)
-except KeyboardInterrupt:
-    aclient.disconnect()
-    print("Disconnectd from broker.")
+payload2 = 'Hello World!'
+
+pub_msgid = aclient.publish(topic1, payload1, qos=2)
+time.sleep(1)
+pub_msgid = aclient.publish(topic2, payload2, qos=2)
+time.sleep(1)
+
+aclient.disconnect()
+print("Disconnected from gateway.")

@@ -86,7 +86,7 @@ class Receivers:
 
     elif packet.mh.MsgType == MQTTSN.REGISTER:
       if callback and hasattr(callback, "register"):
-        pass
+        callback.register(packet.TopicId, packet.TopicName)
 
     elif packet.mh.MsgType == MQTTSN.PUBACK:
       "check if we are expecting a puback"
@@ -171,10 +171,6 @@ class Receivers:
       while True:
         self.receive(callback)
     except:
-      if queue.empty():
-        pass
-      else:
-        queue.get()
       queue.put(sys.exc_info())
       if sys.exc_info()[0] != socket.error:
         #print("unexpected exception", sys.exc_info())

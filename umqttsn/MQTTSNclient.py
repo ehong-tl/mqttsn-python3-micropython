@@ -196,6 +196,7 @@ class Client:
       self.__receiver.lookfor(MQTTSN.DISCONNECT)
     self.sock.send(disconnect.pack())
     msg = self.waitfor(MQTTSN.DISCONNECT)
+    self.stopReceiver()
     
 
   def stopReceiver(self):
