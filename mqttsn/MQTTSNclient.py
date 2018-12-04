@@ -206,8 +206,8 @@ class Client:
 
   def stopReceiver(self):
     self.sock.close() # this will stop the receiver too
-    assert self.__receiver.inMsgs == {}
-    assert self.__receiver.outMsgs == {}
+##    assert self.__receiver.inMsgs == {}
+##    assert self.__receiver.outMsgs == {}
     self.__receiver = None
 
   def receive(self):
